@@ -177,6 +177,7 @@ class BlockBlastGame {
         this.modalTitle = document.getElementById('modal-title');
         this.finalScoreEl = document.getElementById('final-score');
         this.modalScoreText = document.getElementById('modal-score-text');
+        this.nextStageBtn = document.getElementById('next-stage-btn');
 
         // State for drag
         this.draggedBlock = null;
@@ -209,6 +210,15 @@ class BlockBlastGame {
         document.getElementById('game-exit-btn').onclick = () => this.showMenu();
         document.getElementById('restart-btn').onclick = () => this.resetGame();
         document.getElementById('modal-menu-btn').onclick = () => this.showMenu();
+        this.nextStageBtn.onclick = () => this.goToNextStage();
+    }
+
+    goToNextStage() {
+        if (this.currentStageIdx < 10) {
+            this.startStage(this.currentStageIdx + 1);
+        } else {
+            this.showMenu();
+        }
     }
 
     initStageButtons() {
@@ -463,6 +473,7 @@ class BlockBlastGame {
             const el = document.getElementById(`cell-${p.r}-${p.c}`);
             el.style.backgroundColor = block.color;
             el.classList.add('filled');
+            el.classList.remove('target');
             el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.2)' }, { transform: 'scale(1)' }], 200);
         });
         this.score += cells.length;
@@ -562,6 +573,15 @@ class BlockBlastGame {
         this.modalTitle.textContent = "STAGE CLEAR!";
         this.finalScoreEl.textContent = this.score;
         this.modalScoreText.classList.add('hidden');
+        document.getElementById('restart-btn').classList.add('hidden');
+
+        if (this.currentStageIdx < 10) {
+            this.nextStageBtn.classList.remove('hidden');
+        } else {
+            this.modalTitle.textContent = "ALL STAGES CLEARED!";
+            this.nextStageBtn.classList.add('hidden');
+        }
+
         this.gameOverModal.classList.remove('hidden');
     }
 
@@ -569,6 +589,8 @@ class BlockBlastGame {
         this.modalTitle.textContent = "GAME OVER";
         this.finalScoreEl.textContent = this.score;
         this.modalScoreText.classList.remove('hidden');
+        document.getElementById('restart-btn').classList.remove('hidden');
+        this.nextStageBtn.classList.add('hidden');
         this.gameOverModal.classList.remove('hidden');
         if (this.gameMode === 'endless' && this.score > this.bestScore) {
             this.bestScore = this.score;

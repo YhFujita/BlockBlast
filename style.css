@@ -396,8 +396,8 @@ body {
 
 /* Cell modifiers */
 .cell.target {
-    background-color: rgba(21, 52, 96, 0.3) !important;
-    border: 1px dashed rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(21, 52, 96, 0.3);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
 .cell.wall {
