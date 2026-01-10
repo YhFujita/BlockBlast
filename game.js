@@ -1,33 +1,182 @@
 /**
- * Block Blast Clone Game Logic
+ * Block Blast Clone - Integrated Logic (Endless & Stage Mode)
  */
 
 const GRID_SIZE = 8;
 const COLORS = [
-    '#4ecca3', // Teal
-    '#e94560', // Red
-    '#fcdab7', // Peach
-    '#a2d5f2', // Light Blue
-    '#ff7675', // Pink
-    '#fd79a8', // Hot Pink
-    '#fab1a0'  // Coral
+    '#4ecca3', '#e94560', '#fcdab7', '#a2d5f2', '#ff7675', '#fd79a8', '#fab1a0'
 ];
+
+// Stage Definitions (0 = wall, 1 = target area)
+const STAGES = {
+    1: {
+        title: "STAGE 1: READY",
+        grid: [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ],
+        blocks: ['square', 'square', 'square', 'square']
+    },
+    2: {
+        title: "STAGE 2: CROSS",
+        grid: [
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0]
+        ],
+        blocks: ['h4', 'v4', 'h2', 'v2', 'square', 'single']
+    },
+    3: {
+        title: "STAGE 3: HEART",
+        grid: [
+            [0, 1, 1, 0, 0, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ],
+        blocks: ['square', 'l_br', 'l_bl', 't_up', 'v3', 'h3']
+    },
+    4: {
+        title: "STAGE 4: L-MANIA",
+        grid: [
+            [1, 1, 0, 0, 0, 0, 1, 1],
+            [1, 1, 0, 0, 0, 0, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 1, 1],
+            [1, 1, 0, 0, 0, 0, 1, 1]
+        ],
+        blocks: ['l_tr', 'l_tl', 'l_br', 'l_bl', 'square']
+    },
+    5: {
+        title: "STAGE 5: SMILE",
+        grid: [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 1, 1, 0],
+            [0, 1, 1, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 0, 0, 0, 0, 1, 1],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0]
+        ],
+        blocks: ['single', 'h2', 'v2', 'h3', 'v3', 't_down']
+    },
+    6: {
+        title: "STAGE 6: WINDOWS",
+        grid: [
+            [1, 1, 1, 0, 0, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1, 1],
+            [1, 1, 1, 0, 0, 1, 1, 1]
+        ],
+        blocks: ['square', 'h3', 'v3', 'h2', 'v2']
+    },
+    7: {
+        title: "STAGE 7: STAIRS",
+        grid: [
+            [1, 1, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 1, 1],
+            [0, 0, 0, 0, 0, 0, 1, 1],
+            [0, 0, 0, 0, 0, 0, 1, 1],
+            [0, 0, 0, 0, 0, 0, 1, 1]
+        ],
+        blocks: ['h4', 'v4', 'h2', 'v2', 'square']
+    },
+    8: {
+        title: "STAGE 8: DIAMOND",
+        grid: [
+            [0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0, 0]
+        ],
+        blocks: ['t_up', 't_down', 't_left', 't_right', 'square']
+    },
+    9: {
+        title: "STAGE 9: ZIGZAG",
+        grid: [
+            [1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0]
+        ],
+        blocks: ['h4', 'v4', 'h3', 'v3', 'h2', 'v2', 'single']
+    },
+    10: {
+        title: "STAGE 10: MASTER",
+        grid: [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 1, 1, 0, 0, 1],
+            [1, 0, 0, 1, 1, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 1, 1, 0, 0, 1],
+            [1, 0, 0, 1, 1, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1]
+        ],
+        blocks: ['square', 'h4', 'v4', 'h2', 'v2', 'single']
+    }
+};
 
 class BlockBlastGame {
     constructor() {
-        this.grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
+        this.grid = [];
         this.score = 0;
         this.bestScore = localStorage.getItem('blockBlastBestScore') || 0;
-        this.currentBlocks = []; // The 3 blocks currently in dock
+        this.currentBlocks = [];
+        this.gameMode = 'endless'; // 'endless' or 'stage'
+        this.currentStageIdx = 1;
+        this.currentStageBlocks = []; // For stage mode fixed block queue
 
         // DOM Elements
+        this.mainMenu = document.getElementById('main-menu');
+        this.stageSelect = document.getElementById('stage-select');
+        this.gameContainer = document.getElementById('game-container');
         this.gridEl = document.getElementById('grid');
         this.dockEl = document.getElementById('dock');
         this.scoreEl = document.getElementById('score');
         this.bestScoreEl = document.getElementById('best-score');
+        this.bestScoreBox = document.getElementById('best-score-box');
+        this.stageTargetBox = document.getElementById('stage-target-box');
+        this.stageTargetRemainingEl = document.getElementById('stage-target-remaining');
+        this.modeTitleEl = document.getElementById('mode-display-title');
         this.gameOverModal = document.getElementById('game-over-modal');
+        this.modalTitle = document.getElementById('modal-title');
         this.finalScoreEl = document.getElementById('final-score');
-        this.restartBtn = document.getElementById('restart-btn');
+        this.modalScoreText = document.getElementById('modal-score-text');
 
         // State for drag
         this.draggedBlock = null;
@@ -36,28 +185,16 @@ class BlockBlastGame {
         this.startPos = { x: 0, y: 0 };
         this.currentHoverCells = [];
 
-        // Block Shapes Definition
         this.shapes = {
-            single: [[1]],
-            h2: [[1, 1]],
-            v2: [[1], [1]],
-            h3: [[1, 1, 1]],
-            v3: [[1], [1], [1]],
-            h4: [[1, 1, 1, 1]],
-            v4: [[1], [1], [1], [1]],
-            square: [[1, 1], [1, 1]],
-            l_br: [[1, 0], [1, 1]],
-            l_bl: [[0, 1], [1, 1]],
-            l_tr: [[1, 1], [1, 0]],
-            l_tl: [[1, 1], [0, 1]],
-            t_up: [[0, 1, 0], [1, 1, 1]],
-            t_down: [[1, 1, 1], [0, 1, 0]],
-            t_left: [[0, 1], [1, 1], [0, 1]],
-            t_right: [[1, 0], [1, 1], [1, 0]]
+            single: [[1]], h2: [[1, 1]], v2: [[1], [1]], h3: [[1, 1, 1]], v3: [[1], [1], [1]],
+            h4: [[1, 1, 1, 1]], v4: [[1], [1], [1], [1]], square: [[1, 1], [1, 1]],
+            l_br: [[1, 0], [1, 1]], l_bl: [[0, 1], [1, 1]], l_tr: [[1, 1], [1, 0]], l_tl: [[1, 1], [0, 1]],
+            t_up: [[0, 1, 0], [1, 1, 1]], t_down: [[1, 1, 1], [0, 1, 0]],
+            t_left: [[0, 1], [1, 1], [0, 1]], t_right: [[1, 0], [1, 1], [1, 0]]
         };
 
         this.bindEvents();
-        this.init();
+        this.initStageButtons();
     }
 
     bindEvents() {
@@ -65,21 +202,83 @@ class BlockBlastGame {
         document.addEventListener('mouseup', (e) => this.onEnd(e));
         document.addEventListener('touchmove', (e) => this.onMove(e), { passive: false });
         document.addEventListener('touchend', (e) => this.onEnd(e));
-        this.restartBtn.addEventListener('click', () => this.resetGame());
+
+        document.getElementById('endless-mode-btn').onclick = () => this.startEndless();
+        document.getElementById('stage-mode-btn').onclick = () => this.showStageSelect();
+        document.getElementById('back-to-menu').onclick = () => this.showMenu();
+        document.getElementById('game-exit-btn').onclick = () => this.showMenu();
+        document.getElementById('restart-btn').onclick = () => this.resetGame();
+        document.getElementById('modal-menu-btn').onclick = () => this.showMenu();
     }
 
-    init() {
-        this.updateScore(0);
-        this.bestScoreEl.textContent = this.bestScore;
-        this.renderGrid();
-        this.spawnBlocks();
+    initStageButtons() {
+        const container = document.getElementById('stage-buttons');
+        container.innerHTML = '';
+        for (let i = 1; i <= 10; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'stage-btn';
+            btn.textContent = i;
+            btn.onclick = () => this.startStage(i);
+            container.appendChild(btn);
+        }
+    }
+
+    showMenu() {
+        this.mainMenu.classList.remove('hidden');
+        this.stageSelect.classList.add('hidden');
+        this.gameContainer.classList.add('hidden');
         this.gameOverModal.classList.add('hidden');
     }
 
+    showStageSelect() {
+        this.mainMenu.classList.add('hidden');
+        this.stageSelect.classList.remove('hidden');
+    }
+
+    startEndless() {
+        this.gameMode = 'endless';
+        this.mainMenu.classList.add('hidden');
+        this.gameContainer.classList.remove('hidden');
+        this.bestScoreBox.classList.remove('hidden');
+        this.stageTargetBox.classList.add('hidden');
+        this.modeTitleEl.textContent = "ENDLESS MODE";
+        this.resetGame();
+    }
+
+    startStage(idx) {
+        this.gameMode = 'stage';
+        this.currentStageIdx = idx;
+        this.mainMenu.classList.add('hidden');
+        this.stageSelect.classList.add('hidden');
+        this.gameContainer.classList.remove('hidden');
+        this.bestScoreBox.classList.add('hidden');
+        this.stageTargetBox.classList.remove('hidden');
+        this.modeTitleEl.textContent = STAGES[idx].title;
+        this.resetGame();
+    }
+
     resetGame() {
+        this.score = 0;
+        this.scoreEl.textContent = "0";
         this.grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
-        this.dockEl.innerHTML = '';
-        this.init();
+        this.gameOverModal.classList.add('hidden');
+
+        if (this.gameMode === 'stage') {
+            const stage = STAGES[this.currentStageIdx];
+            this.currentStageBlocks = [...stage.blocks];
+            // Apply stage grid pattern
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (stage.grid[r][c] === 0) {
+                        this.grid[r][c] = 'wall';
+                    }
+                }
+            }
+        }
+
+        this.renderGrid();
+        this.spawnBlocks();
+        this.updateStageTarget();
     }
 
     renderGrid() {
@@ -87,14 +286,20 @@ class BlockBlastGame {
         for (let r = 0; r < GRID_SIZE; r++) {
             for (let c = 0; c < GRID_SIZE; c++) {
                 const cell = document.createElement('div');
-                cell.classList.add('cell');
+                cell.className = 'cell';
                 cell.dataset.row = r;
                 cell.dataset.col = c;
                 cell.id = `cell-${r}-${c}`;
-                if (this.grid[r][c]) {
+
+                if (this.grid[r][c] === 'wall') {
+                    cell.classList.add('wall');
+                } else if (this.grid[r][c]) {
                     cell.style.backgroundColor = this.grid[r][c];
                     cell.classList.add('filled');
+                } else if (this.gameMode === 'stage') {
+                    cell.classList.add('target');
                 }
+
                 this.gridEl.appendChild(cell);
             }
         }
@@ -104,19 +309,27 @@ class BlockBlastGame {
         this.currentBlocks = [];
         this.dockEl.innerHTML = '';
         for (let i = 0; i < 3; i++) {
-            this.addRandomBlockToDock(i);
+            this.addBlockToDock(i);
         }
     }
 
-    addRandomBlockToDock(index) {
-        const shapeKeys = Object.keys(this.shapes);
-        const randomKey = shapeKeys[Math.floor(Math.random() * shapeKeys.length)];
-        const shapeStart = this.shapes[randomKey];
-        const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    addBlockToDock(index) {
+        let shapeKey;
+        if (this.gameMode === 'stage') {
+            if (this.currentStageBlocks.length > 0) {
+                shapeKey = this.currentStageBlocks.shift();
+            } else {
+                return; // No more blocks in this stage
+            }
+        } else {
+            const keys = Object.keys(this.shapes);
+            shapeKey = keys[Math.floor(Math.random() * keys.length)];
+        }
+
         const blockObj = {
             id: `block-${Date.now()}-${index}`,
-            shape: shapeStart,
-            color: color,
+            shape: this.shapes[shapeKey],
+            color: COLORS[Math.floor(Math.random() * COLORS.length)],
             dockIndex: index
         };
         this.currentBlocks[index] = blockObj;
@@ -124,27 +337,22 @@ class BlockBlastGame {
     }
 
     renderDockBlock(blockData, index) {
-        if (!blockData) return;
         const wrapper = document.createElement('div');
-        wrapper.classList.add('block-preview');
+        wrapper.className = 'block-preview';
         wrapper.dataset.index = index;
         const blockEl = document.createElement('div');
-        blockEl.classList.add('draggable-block');
+        blockEl.className = 'draggable-block';
         blockEl.style.gridTemplateColumns = `repeat(${blockData.shape[0].length}, 20px)`;
-        blockEl.style.gridTemplateRows = `repeat(${blockData.shape.length}, 20px)`;
         blockData.shape.forEach((row, r) => {
             row.forEach((cell, c) => {
-                const cellDiv = document.createElement('div');
+                const div = document.createElement('div');
                 if (cell === 1) {
-                    cellDiv.classList.add('block-cell');
-                    cellDiv.style.backgroundColor = blockData.color;
-                    cellDiv.dataset.r = r;
-                    cellDiv.dataset.c = c;
+                    div.className = 'block-cell';
+                    div.style.backgroundColor = blockData.color;
                 } else {
-                    cellDiv.style.width = '20px';
-                    cellDiv.style.height = '20px';
+                    div.style.width = '20px'; div.style.height = '20px';
                 }
-                blockEl.appendChild(cellDiv);
+                blockEl.appendChild(div);
             });
         });
         blockEl.addEventListener('mousedown', (e) => this.onStart(e, blockData, index));
@@ -155,7 +363,6 @@ class BlockBlastGame {
 
     onStart(e, blockData, index) {
         e.preventDefault();
-        if (this.draggedBlock) return;
         this.draggedBlock = blockData;
         this.hasMoved = false;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -169,13 +376,10 @@ class BlockBlastGame {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         if (!this.hasMoved) {
-            const dist = Math.hypot(clientX - this.startPos.x, clientY - this.startPos.y);
-            if (dist > 5) {
+            if (Math.hypot(clientX - this.startPos.x, clientY - this.startPos.y) > 5) {
                 this.hasMoved = true;
                 this.initDrag(clientX, clientY);
-            } else {
-                return;
-            }
+            } else return;
         }
         if (e.cancelable) e.preventDefault();
         this.updateDragPosition(clientX, clientY);
@@ -183,20 +387,13 @@ class BlockBlastGame {
     }
 
     initDrag(clientX, clientY) {
-        const blockData = this.draggedBlock;
         this.dragElement = this.originalElement.cloneNode(true);
         this.dragElement.style.position = 'fixed';
         this.dragElement.style.zIndex = '1000';
         this.dragElement.style.pointerEvents = 'none';
-        this.dragElement.style.opacity = '0.9';
         this.dragElement.style.transformOrigin = '0 0';
         this.dragElement.classList.add('dragging');
-        const width = blockData.shape[0].length * 20;
-        const height = blockData.shape.length * 20;
-        this.dragOffset = {
-            x: width,
-            y: height + 60
-        };
+        this.dragOffset = { x: this.draggedBlock.shape[0].length * 20, y: this.draggedBlock.shape.length * 20 + 60 };
         document.body.appendChild(this.dragElement);
         this.originalElement.style.opacity = '0';
     }
@@ -204,14 +401,9 @@ class BlockBlastGame {
     onEnd(e) {
         if (!this.draggedBlock) return;
         if (this.hasMoved) {
-            if (this.currentHoverCells.length > 0) {
-                this.placeBlock(this.draggedBlock, this.currentHoverCells);
-            } else {
-                this.animateReturn();
-            }
-        } else {
-            this.draggedBlock = null;
-        }
+            if (this.currentHoverCells.length > 0) this.placeBlock(this.draggedBlock, this.currentHoverCells);
+            else this.animateReturn();
+        } else this.draggedBlock = null;
     }
 
     updateDragPosition(x, y) {
@@ -226,85 +418,78 @@ class BlockBlastGame {
         this.clearHighlight();
         this.currentHoverCells = [];
         if (!this.dragElement || !this.hasMoved) return;
-        const gridRect = this.gridEl.getBoundingClientRect();
-        const blockLeft = x - this.dragOffset.x;
-        const blockTop = y - this.dragOffset.y;
-        const cellSize = 40, gap = 6, step = cellSize + gap, padding = gap;
-        const relX = blockLeft - (gridRect.left + padding);
-        const relY = blockTop - (gridRect.top + padding);
-        const colIndex = Math.round(relX / step);
-        const rowIndex = Math.round(relY / step);
-        if (this.isValidPlacement(this.draggedBlock.shape, rowIndex, colIndex)) {
-            this.highlightGrid(this.draggedBlock.shape, rowIndex, colIndex, this.draggedBlock.color);
+        const r = this.gridEl.getBoundingClientRect();
+        const col = Math.round((x - this.dragOffset.x - r.left - 6) / 46);
+        const row = Math.round((y - this.dragOffset.y - r.top - 6) / 46);
+        if (this.isValidPlacement(this.draggedBlock.shape, row, col)) {
+            this.highlightGrid(this.draggedBlock.color);
         }
     }
 
     isValidPlacement(shape, startRow, startCol) {
-        const potentialCells = [];
+        const cells = [];
         for (let r = 0; r < shape.length; r++) {
             for (let c = 0; c < shape[r].length; c++) {
                 if (shape[r][c] === 1) {
-                    const gridR = startRow + r, gridC = startCol + c;
-                    if (gridR < 0 || gridR >= GRID_SIZE || gridC < 0 || gridC >= GRID_SIZE) return false;
-                    if (this.grid[gridR][gridC] !== null) return false;
-                    potentialCells.push({ r: gridR, c: gridC });
+                    const gr = startRow + r, gc = startCol + c;
+                    if (gr < 0 || gr >= GRID_SIZE || gc < 0 || gc >= GRID_SIZE) return false;
+                    if (this.grid[gr][gc] !== null) return false;
+                    cells.push({ r: gr, c: gc });
                 }
             }
         }
-        this.currentHoverCells = potentialCells;
+        this.currentHoverCells = cells;
         return true;
     }
 
-    highlightGrid(shape, startRow, startCol, color) {
-        this.currentHoverCells.forEach(pos => {
-            const cell = document.getElementById(`cell-${pos.r}-${pos.c}`);
-            if (cell) {
-                cell.style.backgroundColor = color;
-                cell.style.opacity = '0.5';
-            }
+    highlightGrid(color) {
+        this.currentHoverCells.forEach(p => {
+            const el = document.getElementById(`cell-${p.r}-${p.c}`);
+            if (el) { el.style.backgroundColor = color; el.style.opacity = '0.5'; }
         });
     }
 
     clearHighlight() {
         const cells = this.gridEl.getElementsByClassName('cell');
-        for (let cell of cells) {
-            const r = parseInt(cell.dataset.row), c = parseInt(cell.dataset.col);
-            if (!this.grid[r][c]) {
-                cell.style.backgroundColor = '';
-                cell.style.opacity = '';
-            }
+        for (let el of cells) {
+            const r = parseInt(el.dataset.row), c = parseInt(el.dataset.col);
+            if (!this.grid[r][c]) { el.style.backgroundColor = ''; el.style.opacity = ''; }
         }
     }
 
-    placeBlock(blockData, cells) {
-        cells.forEach(pos => {
-            this.grid[pos.r][pos.c] = blockData.color;
-            const cell = document.getElementById(`cell-${pos.r}-${pos.c}`);
-            cell.style.backgroundColor = blockData.color;
-            cell.classList.add('filled');
-            cell.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.2)' }, { transform: 'scale(1)' }], { duration: 200 });
+    placeBlock(block, cells) {
+        cells.forEach(p => {
+            this.grid[p.r][p.c] = block.color;
+            const el = document.getElementById(`cell-${p.r}-${p.c}`);
+            el.style.backgroundColor = block.color;
+            el.classList.add('filled');
+            el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.2)' }, { transform: 'scale(1)' }], 200);
         });
-        this.updateScore(cells.length);
-        this.currentBlocks[blockData.dockIndex] = null;
-        const wrapper = this.dockEl.querySelector(`.block-preview[data-index="${blockData.dockIndex}"]`);
-        if (wrapper) wrapper.innerHTML = '';
-        if (this.dragElement) {
-            this.dragElement.remove();
-            this.dragElement = null;
-        }
+        this.score += cells.length;
+        this.scoreEl.textContent = this.score;
+        this.currentBlocks[block.dockIndex] = null;
+        const wrap = this.dockEl.querySelector(`[data-index="${block.dockIndex}"]`);
+        if (wrap) wrap.innerHTML = '';
+        if (this.dragElement) { this.dragElement.remove(); this.dragElement = null; }
         this.draggedBlock = null;
         this.clearHighlight();
-        this.checkLines();
-        if (this.currentBlocks.every(b => b === null)) {
-            setTimeout(() => this.spawnBlocks(), 300);
+
+        if (this.gameMode === 'endless') {
+            this.checkLines();
         } else {
-            this.checkGameOver();
+            this.updateStageTarget();
         }
+
+        if (this.currentBlocks.every(b => b === null)) {
+            if (this.gameMode === 'endless' || this.currentStageBlocks.length > 0) {
+                setTimeout(() => this.spawnBlocks(), 300);
+            }
+        }
+        this.checkGameStatus();
     }
 
     animateReturn() {
-        if (!this.dragElement) return;
-        this.dragElement.style.transition = 'all 0.2s ease-out';
+        this.dragElement.style.transition = 'all 0.2s';
         this.dragElement.style.opacity = '0';
         this.dragElement.style.transform = 'scale(0.5)';
         setTimeout(() => {
@@ -317,78 +502,84 @@ class BlockBlastGame {
     }
 
     checkLines() {
-        let linesToClear = { rows: [], cols: [] };
-        for (let r = 0; r < GRID_SIZE; r++) { if (this.grid[r].every(cell => cell !== null)) linesToClear.rows.push(r); }
+        let rToClear = [], cToClear = [];
+        for (let r = 0; r < GRID_SIZE; r++) if (this.grid[r].every(v => v !== null)) rToClear.push(r);
         for (let c = 0; c < GRID_SIZE; c++) {
             let full = true;
-            for (let r = 0; r < GRID_SIZE; r++) { if (this.grid[r][c] === null) { full = false; break; } }
-            if (full) linesToClear.cols.push(c);
+            for (let r = 0; r < GRID_SIZE; r++) if (this.grid[r][c] === null) { full = false; break; }
+            if (full) cToClear.push(c);
         }
-        const totalLines = linesToClear.rows.length + linesToClear.cols.length;
-        if (totalLines > 0) {
-            this.clearLines(linesToClear);
-            this.updateScore(10 * totalLines * totalLines);
-        }
-    }
-
-    clearLines(lines) {
-        const cellsToClear = new Set();
-        lines.rows.forEach(r => { for (let c = 0; c < GRID_SIZE; c++) cellsToClear.add(`${r}-${c}`); });
-        lines.cols.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) cellsToClear.add(`${r}-${c}`); });
-        cellsToClear.forEach(id => {
-            const [r, c] = id.split('-').map(Number);
-            const cell = document.getElementById(`cell-${r}-${c}`);
-            cell.classList.add('flash-clear');
-            this.grid[r][c] = null;
-        });
-        setTimeout(() => {
-            cellsToClear.forEach(id => {
+        if (rToClear.length + cToClear.length > 0) {
+            const count = rToClear.length + cToClear.length;
+            this.score += 10 * count * count;
+            this.scoreEl.textContent = this.score;
+            const cells = new Set();
+            rToClear.forEach(r => { for (let c = 0; c < GRID_SIZE; c++) cells.add(`${r}-${c}`); });
+            cToClear.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) cells.add(`${r}-${c}`); });
+            cells.forEach(id => {
                 const [r, c] = id.split('-').map(Number);
-                const cell = document.getElementById(`cell-${r}-${c}`);
-                cell.className = 'cell';
-                cell.style.backgroundColor = '';
-                cell.style.opacity = '';
+                document.getElementById(`cell-${r}-${c}`).classList.add('flash-clear');
+                this.grid[r][c] = null;
             });
-            if (this.currentBlocks.every(b => b === null)) {
-                setTimeout(() => this.spawnBlocks(), 300);
-            } else {
-                this.checkGameOver();
-            }
-        }, 400);
+            setTimeout(() => this.renderGrid(), 400);
+        }
     }
 
-    checkGameOver() {
-        const availableBlocks = this.currentBlocks.filter(b => b !== null);
-        if (availableBlocks.length === 0) return;
+    updateStageTarget() {
+        if (this.gameMode !== 'stage') return;
+        let count = 0;
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                if (STAGES[this.currentStageIdx].grid[r][c] === 1 && !this.grid[r][c]) count++;
+            }
+        }
+        this.stageTargetRemainingEl.textContent = count;
+        if (count === 0) this.showWin();
+    }
+
+    checkGameStatus() {
+        const av = this.currentBlocks.filter(b => b !== null);
+        if (av.length === 0 && this.gameMode === 'stage' && this.currentStageBlocks.length === 0) {
+            // No more blocks and stage not cleared
+            setTimeout(() => this.showGameOver(), 500);
+            return;
+        }
+
         let canMove = false;
-        for (const block of availableBlocks) {
+        for (let b of av) {
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
-                    if (this.isValidPlacement(block.shape, r, c)) { canMove = true; break; }
+                    if (this.isValidPlacement(b.shape, r, c)) { canMove = true; break; }
                 }
                 if (canMove) break;
             }
             if (canMove) break;
         }
-        if (!canMove) this.showGameOver();
+        if (!canMove && av.length > 0) setTimeout(() => this.showGameOver(), 500);
+    }
+
+    showWin() {
+        this.modalTitle.textContent = "STAGE CLEAR!";
+        this.finalScoreEl.textContent = this.score;
+        this.modalScoreText.classList.add('hidden');
+        this.gameOverModal.classList.remove('hidden');
     }
 
     showGameOver() {
+        this.modalTitle.textContent = "GAME OVER";
         this.finalScoreEl.textContent = this.score;
+        this.modalScoreText.classList.remove('hidden');
         this.gameOverModal.classList.remove('hidden');
+        if (this.gameMode === 'endless' && this.score > this.bestScore) {
+            this.bestScore = this.score;
+            localStorage.setItem('blockBlastBestScore', this.bestScore);
+        }
     }
 
     updateScore(points) {
         this.score += points;
         this.scoreEl.textContent = this.score;
-        if (this.score > this.bestScore) {
-            this.bestScore = this.score;
-            this.bestScoreEl.textContent = this.bestScore;
-            localStorage.setItem('blockBlastBestScore', this.bestScore);
-        }
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    window.game = new BlockBlastGame();
-});
+window.onload = () => window.game = new BlockBlastGame();
