@@ -1,0 +1,242 @@
+:root {
+    --bg-color: #1a1a2e;
+    --grid-bg: #16213e;
+    --cell-empty: #0f3460;
+    --accent-color: #e94560;
+    --text-color: #ffffff;
+    --block-color-1: #4ecca3;
+    --block-color-2: #e94560;
+    --block-color-3: #fcdab7;
+    --block-color-4: #a2d5f2;
+    --block-color-5: #ff7675;
+    
+    --cell-size: 40px;
+    --gap: 6px;
+}
+
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    justify-content: space-between;
+}
+
+/* Header */
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 900;
+}
+
+.highlight {
+    color: var(--accent-color);
+}
+
+.score-board, .best-score-board {
+    text-align: center;
+}
+
+.score-label {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.score-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Game Area */
+.game-area {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: var(--gap);
+    padding: var(--gap);
+    background-color: var(--grid-bg);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 380px; /* cell-size * 8 + gap * 9 approx */
+    aspect-ratio: 1 / 1;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.cell {
+    background-color: var(--cell-empty);
+    border-radius: 6px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.cell.filled {
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Dock */
+.dock-container {
+    width: 100%;
+    height: 140px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    padding: 10px;
+}
+
+.block-preview {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    /* touch-action: none; is handled in JS or logic usually, but here helps if direct */
+}
+
+.draggable-block {
+    display: grid;
+    gap: 2px;
+    cursor: grab;
+    transition: transform 0.1s;
+}
+
+.draggable-block:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+}
+
+.block-cell {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background: #252a41;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal-content h2 {
+    color: var(--accent-color);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #e94560, #a32f4a);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(233, 69, 96, 0.6);
+}
+
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+/* Utility Animations */
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+.pop-in {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.flash-clear {
+    animation: flash 0.4s ease-out forwards;
+}
+
+@keyframes flash {
+    0% { background-color: white; transform: scale(1.1); }
+    100% { background-color: transparent; transform: scale(0); opacity: 0; }
+}
