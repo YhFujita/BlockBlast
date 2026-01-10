@@ -318,8 +318,16 @@ class BlockBlastGame {
     spawnBlocks() {
         this.currentBlocks = [];
         this.dockEl.innerHTML = '';
-        for (let i = 0; i < 3; i++) {
-            this.addBlockToDock(i);
+
+        if (this.gameMode === 'stage') {
+            const count = this.currentStageBlocks.length;
+            for (let i = 0; i < count; i++) {
+                this.addBlockToDock(i);
+            }
+        } else {
+            for (let i = 0; i < 3; i++) {
+                this.addBlockToDock(i);
+            }
         }
     }
 
@@ -492,7 +500,7 @@ class BlockBlastGame {
         }
 
         if (this.currentBlocks.every(b => b === null)) {
-            if (this.gameMode === 'endless' || this.currentStageBlocks.length > 0) {
+            if (this.gameMode === 'endless') {
                 setTimeout(() => this.spawnBlocks(), 300);
             }
         }
