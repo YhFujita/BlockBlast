@@ -503,16 +503,9 @@ class BlockBlastGame {
     }
 
     checkGameStatus() {
+        if (this.gameMode === 'stage') return; // Disable Game Over in Stage Mode
+
         const av = this.currentBlocks.filter(b => b !== null);
-        if (av.length === 0 && this.gameMode === 'stage') {
-            let count = 0;
-            const grid = STAGES[this.currentStageIdx].grid;
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) if (grid[r][c] === 1 && !this.grid[r][c]) count++;
-            }
-            if (count > 0) setTimeout(() => this.showGameOver(), 500);
-            return;
-        }
         let canMove = false;
         for (let b of av) {
             for (let r = 0; r < GRID_SIZE; r++) {
