@@ -21,7 +21,7 @@ class LevelEditor {
     bindEvents() {
         document.getElementById('editor-mode-btn').onclick = () => this.show();
         document.getElementById('editor-back-btn').onclick = () => this.hide();
-        document.getElementById('export-btn').onclick = () => this.exportJSON();
+        document.getElementById('export-btn').onclick = () => this.saveToServer();
         document.getElementById('clear-blocks-btn').onclick = () => {
             this.selectedBlocks = [];
             this.renderSelectedBlocks();
@@ -32,14 +32,101 @@ class LevelEditor {
         this.menu.classList.add('hidden');
         this.screen.classList.remove('hidden');
 
-        // Initialize shapes if needed (in case game instance wasn't fully ready)
+        // Add Stage ID Input if not exists
+        if (!document.getElementById('stage-id-input')) {
+            const container = document.querySelector('.header .header-left');
+            const input = document.createElement('input');
+            input.id = 'stage-id-input';
+            input.type = 'number';
+            input.min = '1';
+            input.value = '11';
+            input.style.width = '60px';
+            input.style.marginLeft = '10px';
+            input.style.padding = '5px';
+            input.style.border = 'none';
+            input.style.borderRadius = '5px';
+            input.placeholder = "ID";
+            container.appendChild(input);
+
+            const label = document.createElement('span');
+            label.textContent = "ID:";
+            label.style.marginLeft = '20px';
+            label.style.fontSize = '0.9rem';
+            label.style.fontWeight = 'bold';
+            container.insertBefore(label, input);
+
+            // Change button text
+            document.getElementById('export-btn').textContent = "SAVE TO FILE";
+        }
+
         if (!this.shapes || Object.keys(this.shapes).length === 0) {
-            this.shapes = window.game.shapes;
+            this.shapes = window.game ? window.game.shapes : {};
         }
 
         this.renderGrid();
         this.renderPalette();
         this.renderSelectedBlocks();
+    }
+
+    // ... (rest of methods)
+
+    saveToServer() {
+        const id = document.getElementById('stage-id-input').value || 11;
+
+        // Construct the new stage object
+        const newHelperGrid = this.grid.map(row => row.map(cell => cell === 1 ? 1 : 0));
+
+        const newStage = {
+            title: `CUSTOM STAGE ${id}`,
+            grid: newHelperGrid,
+            blocks: this.selectedBlocks
+        };
+
+        // Update local STAGES object
+        if (typeof STAGES !== 'undefined') {
+            STAGES[id] = newStage;
+
+            // Generate full file content
+            let fileContent = "// Stage Definitions (0 = wall, 1 = target area)\nconst STAGES = {\n";
+
+            const ids = Object.keys(STAGES).sort((a, b) => parseInt(a) - parseInt(b));
+
+            ids.forEach((key, idx) => {
+                const s = STAGES[key];
+
+                // Grid Formatting
+                const gridRows = s.grid.map(row => {
+                    const rStr = row.map(c => c === 1 ? 1 : 0).join(', ');
+                    return `            [${rStr}]`;
+                });
+
+                // Blocks Formatting
+                const bStr = s.blocks.map(b => `'${b}'`).join(', ');
+
+                fileContent += `    ${key}: {\n`;
+                fileContent += `        title: "${s.title}",\n`;
+                fileContent += `        grid: [\n${gridRows.join(',\n')}\n        ],\n`;
+                fileContent += `        blocks: [${bStr}]\n`;
+                fileContent += `    }${idx < ids.length - 1 ? ',' : ''}\n`;
+            });
+
+            fileContent += "};\n";
+
+            // Send to Server
+            fetch('http://localhost:8000/save_stage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: fileContent })
+            })
+                .then(res => {
+                    if (res.ok) alert(`Stage ${id} Saved Successfully! Reload to play.`);
+                    else alert("Save Failed. Is server.py running?");
+                })
+                .catch(err => alert("Connection Error. Run 'python server.py' in the folder."));
+
+        } else {
+            alert("STAGES object not found. Cannot save.");
+        }
     }
 
     hide() {
