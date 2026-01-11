@@ -15,6 +15,11 @@ class LevelEditor {
         this.paletteEl = document.getElementById('block-palette');
         this.selectedListEl = document.getElementById('selected-blocks-list');
 
+        // Validation Elements
+        this.targetCountEl = document.getElementById('target-count-display');
+        this.blockCountEl = document.getElementById('block-count-display');
+        this.countStatusEl = document.getElementById('count-status');
+
         this.bindEvents();
     }
 
@@ -85,6 +90,7 @@ class LevelEditor {
         this.renderGrid();
         this.renderPalette();
         this.renderSelectedBlocks();
+        this.updateCounts();
     }
 
     // ... (rest of methods)
@@ -108,6 +114,7 @@ class LevelEditor {
 
         this.renderGrid();
         this.renderSelectedBlocks();
+        this.updateCounts();
         alert(`Stage ${id} Loaded!`);
     }
 
@@ -131,12 +138,28 @@ class LevelEditor {
 
         this.renderGrid();
         this.renderSelectedBlocks();
+        this.updateCounts();
 
         alert(`あたらしく つくりました！ ID: ${nextId}`);
     }
 
     saveToServer() {
         const id = document.getElementById('stage-id-input').value || 11;
+
+        // Validation Check
+        const targetCount = this.grid.flat().filter(c => c === 1).length;
+        let blockCount = 0;
+        this.selectedBlocks.forEach(key => {
+            if (this.shapes[key]) {
+                blockCount += this.shapes[key].flat().filter(c => c === 1).length;
+            }
+        });
+
+        if (targetCount !== blockCount) {
+            if (!confirm(`かず が あっていません！ (みどり: ${targetCount}, ぶろっく: ${blockCount})\nそれでも ほぞん しますか？`)) {
+                return;
+            }
+        }
 
         // Construct the new stage object
         const newHelperGrid = this.grid.map(row => row.map(cell => cell === 1 ? 1 : 0));
@@ -221,6 +244,7 @@ class LevelEditor {
         else this.grid[r][c] = 1;
 
         this.renderGrid();
+        this.updateCounts();
     }
 
     // Palette Logic
@@ -267,6 +291,7 @@ class LevelEditor {
     addBlock(key) {
         this.selectedBlocks.push(key);
         this.renderSelectedBlocks();
+        this.updateCounts();
     }
 
     renderSelectedBlocks() {
@@ -289,6 +314,7 @@ class LevelEditor {
             item.onclick = () => {
                 this.selectedBlocks.splice(index, 1);
                 this.renderSelectedBlocks();
+                this.updateCounts();
             };
             this.selectedListEl.appendChild(item);
         });
@@ -320,6 +346,38 @@ class LevelEditor {
 
         navigator.clipboard.writeText(output);
         alert("すてーじ でーた を コピー しました！");
+    }
+
+    updateCounts() {
+        // Calculate Grid Targets
+        const targetCount = this.grid.flat().filter(c => c === 1).length;
+
+        // Calculate Block Cells
+        let blockCount = 0;
+        this.selectedBlocks.forEach(key => {
+            if (this.shapes[key]) {
+                blockCount += this.shapes[key].flat().filter(c => c === 1).length;
+            }
+        });
+
+        // Update UI
+        if (this.targetCountEl) this.targetCountEl.textContent = `みどり: ${targetCount}`;
+        if (this.blockCountEl) this.blockCountEl.textContent = `ぶろっく: ${blockCount}`;
+
+        // Status Status
+        if (this.countStatusEl) {
+            if (targetCount === blockCount) {
+                this.countStatusEl.textContent = "OK!";
+                this.countStatusEl.style.color = "#4ecca3"; // Green
+                this.targetCountEl.style.color = "#ffffff";
+                this.blockCountEl.style.color = "#ffffff";
+            } else {
+                this.countStatusEl.textContent = "ちがいます！";
+                this.countStatusEl.style.color = "#e94560"; // Red
+                this.targetCountEl.style.color = "#e94560";
+                this.blockCountEl.style.color = "#e94560";
+            }
+        }
     }
 }
 
