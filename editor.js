@@ -65,6 +65,17 @@ class LevelEditor {
             loadBtn.style.marginLeft = "10px";
             loadBtn.onclick = () => this.loadStage();
             container.appendChild(loadBtn);
+
+            // Add New Stage Button
+            const newBtn = document.createElement('button');
+            newBtn.textContent = "NEW STAGE";
+            newBtn.className = "btn-small";
+            newBtn.style.marginLeft = "10px";
+            newBtn.style.backgroundColor = "#4ecca3";
+            newBtn.style.color = "#1a1a2e";
+            newBtn.style.fontWeight = "bold";
+            newBtn.onclick = () => this.createNewStage();
+            container.appendChild(newBtn);
         }
 
         if (!this.shapes || Object.keys(this.shapes).length === 0) {
@@ -98,6 +109,30 @@ class LevelEditor {
         this.renderGrid();
         this.renderSelectedBlocks();
         alert(`Stage ${id} Loaded!`);
+    }
+
+    createNewStage() {
+        if (!STAGES) {
+            alert("Stages data not loaded.");
+            return;
+        }
+
+        // Find Max ID
+        const ids = Object.keys(STAGES).map(Number);
+        const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+        const nextId = maxId + 1;
+
+        // Set UI
+        document.getElementById('stage-id-input').value = nextId;
+
+        // Reset Data
+        this.grid = Array(8).fill().map(() => Array(8).fill(null));
+        this.selectedBlocks = [];
+
+        this.renderGrid();
+        this.renderSelectedBlocks();
+
+        alert(`New Stage Created! ID set to ${nextId}.`);
     }
 
     saveToServer() {
