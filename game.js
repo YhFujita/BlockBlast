@@ -113,7 +113,7 @@ class BlockBlastGame {
         this.gameContainer.classList.remove('hidden');
         this.bestScoreBox.classList.remove('hidden');
         this.stageTargetBox.classList.add('hidden');
-        this.modeTitleEl.textContent = "ENDLESS MODE";
+        this.modeTitleEl.textContent = "えんどれす";
         this.resetGame();
     }
 
@@ -525,17 +525,17 @@ class BlockBlastGame {
     }
 
     showWin() {
-        this.modalTitle.textContent = "STAGE CLEAR!";
+        this.modalTitle.textContent = "すてーじ くりあ！";
         this.finalScoreEl.textContent = this.score;
         this.modalScoreText.classList.add('hidden');
         document.getElementById('restart-btn').classList.add('hidden');
         if (this.currentStageIdx < 10) this.nextStageBtn.classList.remove('hidden');
-        else { this.modalTitle.textContent = "ALL STAGES CLEARED!"; this.nextStageBtn.classList.add('hidden'); }
+        else { this.modalTitle.textContent = "ぜんぶ くりあ！すごい！"; this.nextStageBtn.classList.add('hidden'); }
         this.gameOverModal.classList.remove('hidden');
     }
 
     showGameOver() {
-        this.modalTitle.textContent = "GAME OVER";
+        this.modalTitle.textContent = "げーむおーばー";
         this.finalScoreEl.textContent = this.score;
         this.modalScoreText.classList.remove('hidden');
         document.getElementById('restart-btn').classList.remove('hidden');

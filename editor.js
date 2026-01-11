@@ -56,11 +56,11 @@ class LevelEditor {
             container.insertBefore(label, input);
 
             // Change button text
-            document.getElementById('export-btn').textContent = "SAVE TO FILE";
+            document.getElementById('export-btn').textContent = "ほぞん";
 
             // Add Load Button
             const loadBtn = document.createElement('button');
-            loadBtn.textContent = "LOAD";
+            loadBtn.textContent = "よみこみ";
             loadBtn.className = "btn-small";
             loadBtn.style.marginLeft = "10px";
             loadBtn.onclick = () => this.loadStage();
@@ -68,7 +68,7 @@ class LevelEditor {
 
             // Add New Stage Button
             const newBtn = document.createElement('button');
-            newBtn.textContent = "NEW STAGE";
+            newBtn.textContent = "あたらしくつくる";
             newBtn.className = "btn-small";
             newBtn.style.marginLeft = "10px";
             newBtn.style.backgroundColor = "#4ecca3";
@@ -132,7 +132,7 @@ class LevelEditor {
         this.renderGrid();
         this.renderSelectedBlocks();
 
-        alert(`New Stage Created! ID set to ${nextId}.`);
+        alert(`あたらしく つくりました！ ID: ${nextId}`);
     }
 
     saveToServer() {
@@ -142,7 +142,7 @@ class LevelEditor {
         const newHelperGrid = this.grid.map(row => row.map(cell => cell === 1 ? 1 : 0));
 
         const newStage = {
-            title: `CUSTOM STAGE ${id}`,
+            title: `すてーじ ${id}`,
             grid: newHelperGrid,
             blocks: this.selectedBlocks
         };
@@ -184,10 +184,10 @@ class LevelEditor {
                 body: JSON.stringify({ content: fileContent })
             })
                 .then(res => {
-                    if (res.ok) alert(`Stage ${id} Saved Successfully! Reload to play.`);
-                    else alert("Save Failed. Is server.py running?");
+                    if (res.ok) alert(`すてーじ ${id} を ほぞん しました！`);
+                    else alert("ほぞん に しっぱい しました。さーばー は うごいていますか？");
                 })
-                .catch(err => alert("Connection Error. Run 'python server.py' in the folder."));
+                .catch(err => alert("えらー が おきました。"));
 
         } else {
             alert("STAGES object not found. Cannot save.");
@@ -319,7 +319,7 @@ class LevelEditor {
             `    },`;
 
         navigator.clipboard.writeText(output);
-        alert("Copied stage data to clipboard!\nFormat matches game.js style.");
+        alert("すてーじ でーた を コピー しました！");
     }
 }
 

@@ -1,7 +1,7 @@
 // Stage Definitions (0 = wall, 1 = target area)
 const STAGES = {
     1: {
-        title: "STAGE 1: READY",
+        title: "すてーじ 1",
         grid: [
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
@@ -15,7 +15,7 @@ const STAGES = {
         blocks: ['square', 'square', 'square', 'square']
     },
     2: {
-        title: "STAGE 2: CROSS",
+        title: "すてーじ 2",
         grid: [
             [0, 0, 0, 1, 1, 0, 0, 0],
             [0, 0, 0, 1, 1, 0, 0, 0],
@@ -29,7 +29,7 @@ const STAGES = {
         blocks: ['v3', 'v3', 'v3', 'v3', 'h4', 'h4', 'h4', 'h4']
     },
     3: {
-        title: "STAGE 3: L-MANIA",
+        title: "すてーじ 3",
         grid: [
             [1, 1, 1, 0, 0, 0, 0, 0],
             [1, 1, 1, 0, 0, 0, 0, 0],
@@ -43,7 +43,7 @@ const STAGES = {
         blocks: ['l_br', 'l_tl', 'l_bl', 'l_tr', 'v2', 'square', 't_down', 't_up']
     },
     4: {
-        title: "CUSTOM STAGE 4",
+        title: "すてーじ 4",
         grid: [
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
@@ -57,7 +57,7 @@ const STAGES = {
         blocks: ['l_tr', 'l_tl', 'l_br', 'l_bl', 'square', 'square']
     },
     5: {
-        title: "CUSTOM STAGE 5",
+        title: "すてーじ 5",
         grid: [
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 1, 1, 0, 0, 1, 1, 0],
@@ -71,7 +71,7 @@ const STAGES = {
         blocks: ['square', 'square', 'v2', 'v2', 'v2', 'v2', 'h4', 'h4', 'square', 'square']
     },
     6: {
-        title: "CUSTOM STAGE 6",
+        title: "すてーじ 6",
         grid: [
             [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 0, 0, 0, 0, 1, 1],
@@ -85,7 +85,7 @@ const STAGES = {
         blocks: ['square', 'single', 'l_bl', 'single', 'h2', 'single', 'square', 'h4', 'h4', 'v4', 'v4']
     },
     7: {
-        title: "STAGE 7: STAIRS",
+        title: "すてーじ 7",
         grid: [
             [1, 1, 0, 0, 0, 0, 0, 0],
             [1, 1, 1, 1, 0, 0, 0, 0],
@@ -99,7 +99,7 @@ const STAGES = {
         blocks: ['square', 'h4', 'h2', 'h2', 'h2', 'v4', 'v4']
     },
     8: {
-        title: "STAGE 8: DIAMOND",
+        title: "すてーじ 8",
         grid: [
             [0, 0, 0, 1, 1, 0, 0, 0],
             [0, 0, 1, 1, 1, 1, 0, 0],
@@ -113,7 +113,7 @@ const STAGES = {
         blocks: ['square', 'square', 'square', 'square', 'v4', 'v4', 'v2', 'v2', 'l_bl', 'l_br', 'l_tl', 'l_tr']
     },
     9: {
-        title: "STAGE 9: ZIGZAG",
+        title: "すてーじ 9",
         grid: [
             [1, 1, 1, 1, 1, 1, 0, 0],
             [0, 0, 0, 0, 0, 1, 1, 0],
@@ -127,7 +127,7 @@ const STAGES = {
         blocks: ['square', 'square', 'square', 'h4', 'h4', 'h4', 'h4', 'h4', 'h2', 'h2']
     },
     10: {
-        title: "STAGE 10: MASTER",
+        title: "すてーじ 10",
         grid: [
             [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 1, 1, 0, 0, 1],
@@ -141,7 +141,7 @@ const STAGES = {
         blocks: ['l_tl', 'l_tr', 'l_bl', 'l_br', 'l_tl', 'l_tr', 'l_bl', 'l_br', 'l_tl', 'l_tr', 'l_bl', 'l_br', 'l_tl', 'l_tr', 'l_bl', 'l_br']
     },
     11: {
-        title: "CUSTOM STAGE 11",
+        title: "すてーじ 11",
         grid: [
             [0, 1, 0, 0, 0, 0, 0, 0],
             [1, 1, 1, 0, 0, 0, 0, 0],

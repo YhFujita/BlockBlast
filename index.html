@@ -15,11 +15,11 @@
     <!-- Main Menu -->
     <div id="main-menu" class="screen">
         <div class="glass-panel menu-content">
-            <h1 class="logo big">BLOCK <span class="highlight">BLAST</span></h1>
+            <h1 class="logo big">ぶろっく <span class="highlight">ぱずる</span></h1>
             <div class="menu-buttons">
-                <button id="endless-mode-btn" class="btn-primary">ENDLESS MODE</button>
-                <button id="stage-mode-btn" class="btn-primary blue">STAGE MODE</button>
-                <button id="editor-mode-btn" class="btn-secondary">LEVEL EDITOR</button>
+                <button id="endless-mode-btn" class="btn-primary">えんどれす</button>
+                <button id="stage-mode-btn" class="btn-primary blue">すてーじ</button>
+                <button id="editor-mode-btn" class="btn-secondary">つくる</button>
             </div>
         </div>
     </div>
@@ -27,8 +27,8 @@
     <!-- Stage Selection -->
     <div id="stage-select" class="screen hidden">
         <div class="glass-panel stage-content">
-            <button id="back-to-menu" class="btn-back">← Back</button>
-            <h2>SELECT STAGE</h2>
+            <button id="back-to-menu" class="btn-back">← もどる</button>
+            <h2>すてーじ を えらぶ</h2>
             <div id="stage-buttons" class="stage-grid">
                 <!-- 1-10 buttons will be injected here -->
             </div>
@@ -39,19 +39,19 @@
     <div id="game-container" class="game-container hidden">
         <header class="game-header">
             <div class="header-left">
-                <button id="game-exit-btn" class="btn-small">Exit</button>
-                <h2 id="mode-display-title">ENDLESS</h2>
+                <button id="game-exit-btn" class="btn-small">もどる</button>
+                <h2 id="mode-display-title">えんどれす</h2>
             </div>
             <div class="score-board">
-                <div class="score-label">SCORE</div>
+                <div class="score-label">すこあ</div>
                 <div class="score-value" id="score">0</div>
             </div>
             <div id="best-score-box" class="best-score-board">
-                <div class="score-label">BEST</div>
+                <div class="score-label">べすと</div>
                 <div class="score-value" id="best-score">0</div>
             </div>
             <div id="stage-target-box" class="best-score-board hidden">
-                <div class="score-label">TARGET</div>
+                <div class="score-label">あと</div>
                 <div class="score-value" id="stage-target-remaining">0</div>
             </div>
         </header>
@@ -70,12 +70,12 @@
     <!-- Modals -->
     <div id="game-over-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 id="modal-title">GAME OVER</h2>
-            <p id="modal-score-text">Final Score: <span id="final-score">0</span></p>
+            <h2 id="modal-title">げーむおーばー</h2>
+            <p id="modal-score-text">すこあ: <span id="final-score">0</span></p>
             <div class="modal-buttons">
-                <button id="next-stage-btn" class="btn-primary blue hidden">Next Stage</button>
-                <button id="restart-btn" class="btn-primary">Try Again</button>
-                <button id="modal-menu-btn" class="btn-secondary">Menu</button>
+                <button id="next-stage-btn" class="btn-primary blue hidden">つぎのすてーじ</button>
+                <button id="restart-btn" class="btn-primary">もういちど</button>
+                <button id="modal-menu-btn" class="btn-secondary">めにゅー</button>
             </div>
         </div>
     </div>
@@ -88,27 +88,25 @@
         <div class="header">
             <div class="header-left">
                 <button id="editor-back-btn" class="btn-back">←</button>
-                <h2 style="margin:0;">LEVEL EDITOR</h2>
+                <h2 style="margin:0;">つくる</h2>
             </div>
-            <button id="export-btn" class="btn-small blue">COPY JSON</button>
+            <button id="export-btn" class="btn-small blue">ほぞん</button>
         </div>
 
         <div class="editor-container">
             <div class="editor-main">
-                <h3>1. Design Grid</h3>
-                <p class="instruction">Click cells to toggle: Empty -> <span style="color:#4ecca3">Target</span> ->
-                    <span style="color:#666">Wall</span>
-                </p>
+                <h3>1. かたち を つくる</h3>
+                <p class="instruction">くりっく して <span style="color:#4ecca3">みどり</span> に してね！</p>
                 <div id="editor-grid" class="grid-container"></div>
             </div>
 
             <div class="editor-sidebar">
-                <h3>2. Select Blocks</h3>
+                <h3>2. ぶろっく を えらぶ</h3>
                 <div id="block-palette" class="block-palette"></div>
 
-                <h3>Selected Blocks</h3>
+                <h3>えらんだ ぶろっく</h3>
                 <div id="selected-blocks-list" class="selected-list"></div>
-                <button id="clear-blocks-btn" class="btn-small red">Clear All Blocks</button>
+                <button id="clear-blocks-btn" class="btn-small red">ぶろっく を けす</button>
             </div>
         </div>
     </div>
