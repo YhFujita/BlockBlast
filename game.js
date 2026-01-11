@@ -77,7 +77,8 @@ class BlockBlastGame {
     }
 
     goToNextStage() {
-        if (this.currentStageIdx < 10) this.startStage(this.currentStageIdx + 1);
+        const maxStage = Object.keys(STAGES).length;
+        if (this.currentStageIdx < maxStage) this.startStage(this.currentStageIdx + 1);
         else this.showMenu();
     }
 
@@ -522,7 +523,9 @@ class BlockBlastGame {
         this.finalScoreEl.textContent = this.score;
         this.modalScoreText.classList.add('hidden');
         document.getElementById('restart-btn').classList.add('hidden');
-        if (this.currentStageIdx < 10) this.nextStageBtn.classList.remove('hidden');
+
+        const maxStage = Object.keys(STAGES).length;
+        if (this.currentStageIdx < maxStage) this.nextStageBtn.classList.remove('hidden');
         else { this.modalTitle.textContent = "ぜんぶ くりあ！すごい！"; this.nextStageBtn.classList.add('hidden'); }
         this.gameOverModal.classList.remove('hidden');
     }

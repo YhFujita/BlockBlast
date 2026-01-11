@@ -166,7 +166,7 @@ const STAGES = {
             [1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1]
         ],
-        blocks: ['h4', 't_down', 'square', 'v4', 't_right', 'single', 'v3', 'v2', 'square', 'l_br', 'single', 'l_bl', 'h2', 'v4', 'h4', 'v2', 'square', 'v4', 'single', 'v3', 'v4']
+        blocks: ['h4', 't_down', 'square', 'v4', 't_right', 'single', 'v3', 'v2', 'square', 'l_br', 'single', 'l_bl', 'v4', 'h4', 'v2', 'square', 'v4', 'single', 'v3', 'v4', 'single']
     },
     13: {
         title: "すてーじ 13",
