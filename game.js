@@ -232,6 +232,7 @@ class BlockBlastGame {
 
     tryPickup(e, r, c) {
         if (this.gameMode !== 'stage') return;
+        if (this.draggedBlock) return; // Prevent double pickup
         const cellData = this.grid[r][c];
         if (!cellData || typeof cellData !== 'object') return; // Not a removable block
 
@@ -318,6 +319,7 @@ class BlockBlastGame {
     }
 
     onStart(e, blockData, index) {
+        if (this.draggedBlock) return; // Prevent double pickup
         e.preventDefault();
         this.draggedBlock = blockData;
         this.hasMoved = false;
