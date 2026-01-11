@@ -127,56 +127,30 @@ class LevelEditor {
 
     // Export
     exportJSON() {
-        // Convert grid to JSON format: 1=Target, 0=Wall, null/others=0 (Empty implies 0 in STAGES format if we strictly follow game.js logic?)
-        // Wait, game.js logic:
-        // if (stage.grid[r][c] === 1) -> Target
-        // if (stage.grid[r][c] === 0) -> Wall
-        // Empty cells are... usually 0 in the source array?
-        // Ah, looking at STAGES in game.js:
-        // [0, 0, 1, 1...] 
-        // 0 is Wall?
-        // Let's re-read game.js: "if (stage.grid[r][c] === 0) this.grid[r][c] = 'wall';"
-        // So 0 MUST be Wall.
-        // What about Empty cells that are NOT walls?
-        // Stage 1 has many 0s. Are they ALL walls?
-        // Yes, Stage 1 is a 4x4 hole in a wall of 0s. 
-        // So in game.js, 0 = Wall. 1 = Target.
-        // Is there a way to define "Placeable but not target"?
-        // Currently NO. The logic only supports Wall or Target (which is placeable).
-        // If a cell is NOT 0 and NOT 1... say 2?
-        // game.js: `if (stage.grid[r][c] === 0) ... wall`. `else if (gameMode === 'stage') cell.classList.add('target')`.
-        // Wait, `renderGrid()`:
-        // `else if (this.gameMode === 'stage') cell.classList.add('target');`
-        // It adds target class to ALL non-wall, non-filled cells!
-        // So currently, EVERY non-wall cell is a target.
-        // This means "Empty but not target" is IMPOSSIBLE in the current code.
-        // This simplifies things: **0=Wall, 1=Target**. That's it.
-        // My editor toggling "Empty -> Target -> Wall" is redundant.
-        // It should just be "Target (1) -> Wall (0)".
-        // Or "Placeable (1) -> Wall (0)".
-        // Wait, if I export `null`, my JSON routine needs to convert it.
+        // Formatter to match game.js style (JS Object Literal, not strict JSON)
 
-        // Revised Logic:
-        // Grid should default to 0 (Wall), and toggling sets to 1 (Target).
-        // Wait, usually puzzle games have "Empty Space" (no target, but placeable).
-        // But Block Blast Stage Mode seems to define the "Board" as the Target Area.
-        // So you build the "Board Shape" (Target) and everything else is Void (Wall).
-        // Correct.
+        // 1. Format Grid: One row per line
+        const gridRows = this.grid.map(row => {
+            // Convert to 0/1 array. Treat null as 0 (Wall), 0 as Wall, 1 as Target.
+            // Basically if it's 1 it's 1, else 0.
+            const rowArr = row.map(cell => cell === 1 ? 1 : 0);
+            return `            [${rowArr.join(', ')}]`;
+        });
+        const gridStr = `[\n${gridRows.join(',\n')}\n        ]`;
 
-        // Export Logic:
-        // Map internal grid: 1 -> 1, 0 -> 0.
+        // 2. Format Blocks: Single quoted strings
+        const blocksStr = `['${this.selectedBlocks.join("', '")}']`;
 
-        const exportGrid = this.grid.map(row => row.map(cell => cell === 1 ? 1 : 0));
+        // 3. Assemble Object
+        // Using unquoted keys for consistency with user's specific request about "notation"
+        const output = `    {\n` +
+            `        title: "CUSTOM STAGE",\n` +
+            `        grid: ${gridStr},\n` +
+            `        blocks: ${blocksStr}\n` +
+            `    },`;
 
-        const data = {
-            title: "CUSTOM STAGE",
-            grid: exportGrid,
-            blocks: this.selectedBlocks
-        };
-
-        const jsonStr = JSON.stringify(data, null, 4);
-        navigator.clipboard.writeText(jsonStr + ",");
-        alert("Copied stage JSON to clipboard! Paste it into game.js.");
+        navigator.clipboard.writeText(output);
+        alert("Copied stage data to clipboard!\nFormat matches game.js style.");
     }
 }
 
