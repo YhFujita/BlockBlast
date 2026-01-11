@@ -216,10 +216,9 @@ class LevelEditor {
     }
 
     toggleCell(r, c) {
-        // Cycle: Empty (null) -> Target (1) -> Wall (0) -> Empty
-        if (this.grid[r][c] === null) this.grid[r][c] = 1;         // Empty -> Target
-        else if (this.grid[r][c] === 1) this.grid[r][c] = 0;       // Target -> Wall
-        else this.grid[r][c] = null;                               // Wall -> Empty
+        // Toggle: Empty (null) <-> Target (1)
+        if (this.grid[r][c] === 1) this.grid[r][c] = null;
+        else this.grid[r][c] = 1;
 
         this.renderGrid();
     }
