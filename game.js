@@ -56,6 +56,10 @@ class BlockBlastGame {
 
         this.bindEvents();
         this.initStageButtons();
+
+        // Prevent context menu and selection
+        this.gameContainer.addEventListener('contextmenu', (e) => e.preventDefault());
+        this.gameContainer.addEventListener('selectstart', (e) => e.preventDefault());
     }
 
     bindEvents() {
@@ -80,13 +84,15 @@ class BlockBlastGame {
     initStageButtons() {
         const container = document.getElementById('stage-buttons');
         container.innerHTML = '';
-        for (let i = 1; i <= 10; i++) {
+        const stageIds = Object.keys(STAGES).map(Number).sort((a, b) => a - b);
+
+        stageIds.forEach(i => {
             const btn = document.createElement('button');
             btn.className = 'stage-btn';
             btn.textContent = i;
             btn.onclick = () => this.startStage(i);
             container.appendChild(btn);
-        }
+        });
     }
 
     showMenu() {
@@ -151,9 +157,16 @@ class BlockBlastGame {
                 cell.dataset.row = r;
                 cell.dataset.col = c;
                 cell.id = `cell-${r}-${c}`;
+
+                // Add pickup listener
+                cell.onmousedown = (e) => this.tryPickup(e, r, c);
+                cell.ontouchstart = (e) => this.tryPickup(e, r, c);
+
                 if (this.grid[r][c] === 'wall') cell.classList.add('wall');
                 else if (this.grid[r][c]) {
-                    cell.style.backgroundColor = this.grid[r][c];
+                    const val = this.grid[r][c];
+                    const color = typeof val === 'object' ? val.color : val;
+                    cell.style.backgroundColor = color;
                     cell.classList.add('filled');
                 } else if (this.gameMode === 'stage') cell.classList.add('target');
                 this.gridEl.appendChild(cell);
@@ -214,6 +227,93 @@ class BlockBlastGame {
         blockEl.addEventListener('touchstart', (e) => this.onStart(e, blockData, index), { passive: false });
         wrapper.appendChild(blockEl);
         this.dockEl.appendChild(wrapper);
+    }
+
+    tryPickup(e, r, c) {
+        if (this.gameMode !== 'stage') return;
+        const cellData = this.grid[r][c];
+        if (!cellData || typeof cellData !== 'object') return; // Not a removable block
+
+        e.preventDefault();
+
+        // 1. Identify all cells of this block instance
+        const blockCells = [];
+        for (let tr = 0; tr < GRID_SIZE; tr++) {
+            for (let tc = 0; tc < GRID_SIZE; tc++) {
+                const td = this.grid[tr][tc];
+                if (td && typeof td === 'object' &&
+                    td.dockIndex === cellData.dockIndex &&
+                    td.color === cellData.color) {
+                    blockCells.push({ r: tr, c: tc });
+                }
+            }
+        }
+
+        // Store original cells for restoration
+        this.returnCells = blockCells.map(p => ({
+            r: p.r,
+            c: p.c,
+            data: this.grid[p.r][p.c]
+        }));
+
+        // 2. Remove from Grid
+        blockCells.forEach(p => {
+            this.grid[p.r][p.c] = null;
+            const el = document.getElementById(`cell-${p.r}-${p.c}`);
+            if (el) {
+                el.className = 'cell';
+                el.style.backgroundColor = '';
+                // If it was a target cell, we need to show the target style again
+                // Check stages data? Or just re-render.
+                // Re-rendering is safer.
+            }
+        });
+
+        this.renderGrid();
+
+        // 3. Start Drag Logic
+        const blockData = {
+            shape: cellData.shape,
+            color: cellData.color,
+            dockIndex: cellData.dockIndex
+        };
+
+        this.draggedBlock = blockData;
+        this.hasMoved = true; // Skip threshold
+
+        // Create Drag Element manually since we don't have a DOM source
+        this.dragElement = document.createElement('div');
+        this.dragElement.className = 'draggable-block dragging';
+        this.dragElement.style.position = 'fixed';
+        this.dragElement.style.zIndex = '1000';
+        this.dragElement.style.pointerEvents = 'none';
+        this.dragElement.style.transformOrigin = '0 0';
+        this.dragElement.style.gridTemplateColumns = `repeat(${blockData.shape[0].length}, 20px)`;
+
+        blockData.shape.forEach(row => {
+            row.forEach(cell => {
+                const div = document.createElement('div');
+                if (cell === 1) {
+                    div.className = 'block-cell';
+                    div.style.backgroundColor = blockData.color;
+                } else {
+                    div.style.width = '20px'; div.style.height = '20px';
+                }
+                this.dragElement.appendChild(div);
+            });
+        });
+
+        document.body.appendChild(this.dragElement);
+
+        this.dragOffset = { x: blockData.shape[0].length * 20, y: blockData.shape.length * 20 + 60 };
+
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const cy = e.touches ? e.touches[0].clientY : e.clientY;
+
+        this.updateDragPosition(cx, cy);
+
+        // 4. Update Target Count (since we removed a block)
+        this.updateStageTarget();
     }
 
     onStart(e, blockData, index) {
@@ -311,8 +411,17 @@ class BlockBlastGame {
     }
 
     placeBlock(block, cells) {
+        this.returnCells = null; // Clear restoration data
         cells.forEach(p => {
-            this.grid[p.r][p.c] = block.color;
+            if (this.gameMode === 'stage') {
+                this.grid[p.r][p.c] = {
+                    color: block.color,
+                    dockIndex: block.dockIndex,
+                    shape: block.shape
+                };
+            } else {
+                this.grid[p.r][p.c] = block.color;
+            }
             const el = document.getElementById(`cell-${p.r}-${p.c}`);
             el.style.backgroundColor = block.color;
             el.classList.add('filled');
@@ -341,12 +450,24 @@ class BlockBlastGame {
             if (this.dragElement) this.dragElement.remove();
             this.dragElement = null;
             this.draggedBlock = null;
+
+            // Restore Block to Grid if exists
+            if (this.returnCells) {
+                this.returnCells.forEach(p => {
+                    this.grid[p.r][p.c] = p.data;
+                });
+                this.returnCells = null;
+                this.renderGrid();
+                this.updateStageTarget(); // Re-calculate target count
+            }
+
             if (this.originalElement) this.originalElement.style.opacity = '1';
         }, 200);
         this.clearHighlight();
     }
 
     checkLines() {
+        if (this.gameMode === 'stage') return;
         let rTC = [], cTC = [];
         for (let r = 0; r < GRID_SIZE; r++) if (this.grid[r].every(v => v !== null)) rTC.push(r);
         for (let c = 0; c < GRID_SIZE; c++) {
@@ -428,5 +549,3 @@ class BlockBlastGame {
 }
 
 window.onload = () => window.game = new BlockBlastGame();
-
-

@@ -43,13 +43,13 @@ const STAGES = {
         blocks: ['l_br', 'l_tl', 'l_bl', 'l_tr', 'v2', 'square', 't_down', 't_up']
     },
     4: {
-        title: "STAGE 4: L-MANIA2",
+        title: "CUSTOM STAGE 4",
         grid: [
-            [1, 1, 0, 0, 0, 0, 1, 1],
-            [1, 1, 0, 0, 0, 0, 1, 1],
             [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 1, 1, 0, 0],
-            [0, 0, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [1, 1, 0, 0, 0, 0, 1, 1],
             [1, 1, 0, 0, 0, 0, 1, 1]
@@ -57,7 +57,7 @@ const STAGES = {
         blocks: ['l_tr', 'l_tl', 'l_br', 'l_bl', 'square', 'square']
     },
     5: {
-        title: "STAGE 5: SMILE",
+        title: "CUSTOM STAGE 5",
         grid: [
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 1, 1, 0, 0, 1, 1, 0],
@@ -68,7 +68,7 @@ const STAGES = {
             [0, 1, 1, 1, 1, 1, 1, 0],
             [0, 0, 1, 1, 1, 1, 0, 0]
         ],
-        blocks: ['square', 'square', 'v2', 'v2', 'v2', 'v2', 'h4', 'h4']
+        blocks: ['square', 'square', 'v2', 'v2', 'v2', 'v2', 'h4', 'h4', 'square', 'square']
     },
     6: {
         title: "STAGE 6: WINDOWS",
@@ -139,5 +139,19 @@ const STAGES = {
             [1, 1, 1, 1, 1, 1, 1, 1]
         ],
         blocks: ['l_tl', 'l_tr', 'l_bl', 'l_br', 'l_tl', 'l_tr', 'l_bl', 'l_br', 'l_tl', 'l_tr', 'l_bl', 'l_br', 'l_tl', 'l_tr', 'l_bl', 'l_br']
+    },
+    11: {
+        title: "CUSTOM STAGE 11",
+        grid: [
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 1, 1, 0],
+            [0, 1, 0, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 1, 1, 0],
+            [1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0, 0, 0]
+        ],
+        blocks: ['t_up', 't_down', 't_left', 't_right', 'square', 'h4']
     }
 };

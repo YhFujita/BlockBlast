@@ -57,6 +57,14 @@ class LevelEditor {
 
             // Change button text
             document.getElementById('export-btn').textContent = "SAVE TO FILE";
+
+            // Add Load Button
+            const loadBtn = document.createElement('button');
+            loadBtn.textContent = "LOAD";
+            loadBtn.className = "btn-small";
+            loadBtn.style.marginLeft = "10px";
+            loadBtn.onclick = () => this.loadStage();
+            container.appendChild(loadBtn);
         }
 
         if (!this.shapes || Object.keys(this.shapes).length === 0) {
@@ -69,6 +77,28 @@ class LevelEditor {
     }
 
     // ... (rest of methods)
+
+    loadStage() {
+        const id = document.getElementById('stage-id-input').value;
+        if (!id || !STAGES[id]) {
+            alert("Stage ID not found!");
+            return;
+        }
+
+        const stage = STAGES[id];
+
+        // Load Grid (1=Target, 0=Wall)
+        // Stage grid uses 1 for target, 0 for wall.
+        // My editor grid uses 1 for target, 0 for wall. Compatible.
+        this.grid = stage.grid.map(row => [...row]); // Deep copy
+
+        // Load Blocks
+        this.selectedBlocks = [...stage.blocks];
+
+        this.renderGrid();
+        this.renderSelectedBlocks();
+        alert(`Stage ${id} Loaded!`);
+    }
 
     saveToServer() {
         const id = document.getElementById('stage-id-input').value || 11;
@@ -161,6 +191,11 @@ class LevelEditor {
 
     // Palette Logic
     renderPalette() {
+        if (!this.shapes || Object.keys(this.shapes).length === 0) {
+            this.shapes = window.game ? window.game.shapes : {};
+        }
+        if (Object.keys(this.shapes).length === 0) return; // Still no shapes
+
         if (this.paletteEl.children.length > 0) return; // Only render once
 
         for (const [key, shapeMap] of Object.entries(this.shapes)) {
@@ -168,27 +203,31 @@ class LevelEditor {
             item.className = 'palette-item palette-preview';
             item.title = key;
 
-            // Mini preview
-            const preview = document.createElement('div');
-            preview.style.display = 'grid';
-            preview.style.gap = '1px';
-            preview.style.gridTemplateColumns = `repeat(${shapeMap[0].length}, 1fr)`;
+            this.renderShapePreview(item, shapeMap); // Helper
 
-            shapeMap.forEach(row => {
-                row.forEach(cell => {
-                    const div = document.createElement('div');
-                    if (cell === 1) {
-                        div.className = 'block-cell';
-                        div.style.backgroundColor = 'white';
-                    }
-                    preview.appendChild(div);
-                });
-            });
-
-            item.appendChild(preview);
             item.onclick = () => this.addBlock(key);
             this.paletteEl.appendChild(item);
         }
+    }
+
+    renderShapePreview(container, shapeMap) {
+        // Mini preview
+        const preview = document.createElement('div');
+        preview.style.display = 'grid';
+        preview.style.gap = '1px';
+        preview.style.gridTemplateColumns = `repeat(${shapeMap[0].length}, 1fr)`;
+
+        shapeMap.forEach(row => {
+            row.forEach(cell => {
+                const div = document.createElement('div');
+                if (cell === 1) {
+                    div.className = 'block-cell';
+                    div.style.backgroundColor = 'white';
+                }
+                preview.appendChild(div);
+            });
+        });
+        container.appendChild(preview);
     }
 
     addBlock(key) {
@@ -201,9 +240,18 @@ class LevelEditor {
         this.selectedBlocks.forEach((key, index) => {
             const item = document.createElement('div');
             item.className = 'palette-item selected-item';
-            item.textContent = key.toUpperCase().substring(0, 2); // Simple label
-            item.style.fontSize = '0.7rem';
-            item.style.color = 'rgba(255,255,255,0.7)';
+            item.title = key;
+
+            // Re-use shape rendering
+            if (this.shapes[key]) {
+                const previewContainer = document.createElement('div');
+                previewContainer.style.pointerEvents = 'none'; // Click goes to item
+                this.renderShapePreview(previewContainer, this.shapes[key]);
+                item.appendChild(previewContainer);
+            } else {
+                item.textContent = "?";
+            }
+
             item.onclick = () => {
                 this.selectedBlocks.splice(index, 1);
                 this.renderSelectedBlocks();
