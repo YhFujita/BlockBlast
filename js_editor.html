@@ -1,0 +1,348 @@
+<script>
+    /**
+     * Level Editor Logic
+     */
+
+    class LevelEditor {
+        constructor() {
+            this.grid = Array(8).fill().map(() => Array(8).fill(null)); // null=Empty, 1=Target, 0=Wall
+            this.selectedBlocks = [];
+            this.shapes = window.game ? window.game.shapes : {}; // Access existing shapes
+
+            // DOM Elements
+            this.screen = document.getElementById('level-editor');
+            this.menu = document.getElementById('main-menu');
+            this.gridEl = document.getElementById('editor-grid');
+            this.paletteEl = document.getElementById('block-palette');
+            this.selectedListEl = document.getElementById('selected-blocks-list');
+
+            // Validation Elements
+            this.targetCountEl = document.getElementById('target-count-display');
+            this.blockCountEl = document.getElementById('block-count-display');
+            this.countStatusEl = document.getElementById('count-status');
+
+            this.bindEvents();
+        }
+
+        bindEvents() {
+            document.getElementById('editor-mode-btn').onclick = () => this.show();
+            document.getElementById('editor-back-btn').onclick = () => this.hide();
+            document.getElementById('export-btn').onclick = () => this.saveToServer();
+            document.getElementById('clear-blocks-btn').onclick = () => {
+                this.selectedBlocks = [];
+                this.renderSelectedBlocks();
+                this.updateCounts();
+            };
+        }
+
+        show() {
+            this.menu.classList.add('hidden');
+            this.screen.classList.remove('hidden');
+
+            // Add Stage ID Input if not exists
+            if (!document.getElementById('stage-id-input')) {
+                const container = document.querySelector('.header .header-left');
+                const input = document.createElement('input');
+                input.id = 'stage-id-input';
+                input.type = 'number';
+                input.min = '1';
+                input.value = '11';
+                input.style.width = '60px';
+                input.style.marginLeft = '10px';
+                input.style.padding = '5px';
+                input.style.border = 'none';
+                input.style.borderRadius = '5px';
+                input.placeholder = "ID";
+                container.appendChild(input);
+
+                const label = document.createElement('span');
+                label.textContent = "ID:";
+                label.style.marginLeft = '20px';
+                label.style.fontSize = '0.9rem';
+                label.style.fontWeight = 'bold';
+                container.insertBefore(label, input);
+
+                // Change button text
+                document.getElementById('export-btn').textContent = "ほぞん";
+
+                // Add Load Button
+                const loadBtn = document.createElement('button');
+                loadBtn.textContent = "よみこみ";
+                loadBtn.className = "btn-small";
+                loadBtn.style.marginLeft = "10px";
+                loadBtn.onclick = () => this.loadStage();
+                container.appendChild(loadBtn);
+
+                // Add New Stage Button
+                const newBtn = document.createElement('button');
+                newBtn.textContent = "あたらしくつくる";
+                newBtn.className = "btn-small";
+                newBtn.style.marginLeft = "10px";
+                newBtn.style.backgroundColor = "#4ecca3";
+                newBtn.style.color = "#1a1a2e";
+                newBtn.style.fontWeight = "bold";
+                newBtn.onclick = () => this.createNewStage();
+                container.appendChild(newBtn);
+            }
+
+            // Wait for game to initialize to get shapes
+            if (!this.shapes || Object.keys(this.shapes).length === 0) {
+                this.shapes = window.game ? window.game.shapes : {};
+            }
+
+            this.renderGrid();
+            this.renderPalette();
+            this.renderSelectedBlocks();
+            this.updateCounts();
+        }
+
+        // ... (rest of methods)
+
+        loadStage() {
+            const id = document.getElementById('stage-id-input').value;
+            if (!id || !STAGES[id]) {
+                alert("Stage ID not found!");
+                return;
+            }
+
+            const stage = STAGES[id];
+
+            // Load Grid (1=Target, 0=Wall)
+            // Stage grid uses 1 for target, 0 for wall.
+            // My editor grid uses 1 for target, 0 for wall. Compatible.
+            this.grid = stage.grid.map(row => [...row]); // Deep copy
+
+            // Load Blocks
+            this.selectedBlocks = [...stage.blocks];
+
+            this.renderGrid();
+            this.renderSelectedBlocks();
+            this.updateCounts();
+            alert(`Stage ${id} Loaded!`);
+        }
+
+        createNewStage() {
+            if (!STAGES) {
+                alert("Stages data not loaded.");
+                return;
+            }
+
+            // Find Max ID
+            const ids = Object.keys(STAGES).map(Number);
+            const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+            const nextId = maxId + 1;
+
+            // Set UI
+            document.getElementById('stage-id-input').value = nextId;
+
+            // Reset Data
+            this.grid = Array(8).fill().map(() => Array(8).fill(null));
+            this.selectedBlocks = [];
+
+            this.renderGrid();
+            this.renderSelectedBlocks();
+            this.updateCounts();
+
+            alert(`あたらしく つくりました！ ID: ${nextId}`);
+        }
+
+        saveToServer() {
+            const id = document.getElementById('stage-id-input').value || 11;
+
+            // Validation Check
+            const targetCount = this.grid.flat().filter(c => c === 1).length;
+            let blockCount = 0;
+            this.selectedBlocks.forEach(key => {
+                if (this.shapes[key]) {
+                    blockCount += this.shapes[key].flat().filter(c => c === 1).length;
+                }
+            });
+
+            if (targetCount !== blockCount) {
+                if (!confirm(`かず が あっていません！ (みどり: ${targetCount}, ぶろっく: ${blockCount})\nそれでも ほぞん しますか？`)) {
+                    return;
+                }
+            }
+
+            // Construct the new stage object
+            const newHelperGrid = this.grid.map(row => row.map(cell => cell === 1 ? 1 : 0));
+
+            const stageData = {
+                id: id,
+                title: `すてーじ ${id}`,
+                grid: newHelperGrid,
+                blocks: this.selectedBlocks
+            };
+
+            // Update local STAGES
+            if (typeof STAGES !== 'undefined') {
+                STAGES[id] = stageData;
+            }
+
+            // Send to Server (GAS)
+            // Show loading state
+            const btn = document.getElementById('export-btn');
+            const originalText = btn.textContent;
+            btn.textContent = "ほぞんちゅう...";
+            btn.disabled = true;
+
+            // Use google.script.run (Native GAS communication)
+            google.script.run
+                .withSuccessHandler((response) => {
+                    if (response.status === 'success') {
+                        alert(`すてーじ ${id} を ほぞん しました！`);
+                    } else {
+                        alert("エラ―: " + (response.message || "Unknown error"));
+                    }
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                })
+                .withFailureHandler((err) => {
+                    alert("つうしん エラー が おきました: " + err);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                })
+                .saveStage(stageData);
+        }
+
+        hide() {
+            this.screen.classList.add('hidden');
+            this.menu.classList.remove('hidden');
+        }
+
+        // Grid Logic
+        renderGrid() {
+            this.gridEl.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (this.grid[r][c] === 1) cell.classList.add('editor-target');
+                    else if (this.grid[r][c] === 0) cell.classList.add('editor-wall');
+
+                    cell.onclick = () => this.toggleCell(r, c);
+                    this.gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        toggleCell(r, c) {
+            // Toggle: Empty (null) <-> Target (1)
+            if (this.grid[r][c] === 1) this.grid[r][c] = null;
+            else this.grid[r][c] = 1;
+
+            this.renderGrid();
+            this.updateCounts();
+        }
+
+        // Palette Logic
+        renderPalette() {
+            if (!this.shapes || Object.keys(this.shapes).length === 0) {
+                this.shapes = window.game ? window.game.shapes : {};
+            }
+            if (Object.keys(this.shapes).length === 0) return; // Still no shapes
+
+            if (this.paletteEl.children.length > 0) return; // Only render once
+
+            for (const [key, shapeMap] of Object.entries(this.shapes)) {
+                const item = document.createElement('div');
+                item.className = 'palette-item palette-preview';
+                item.title = key;
+
+                this.renderShapePreview(item, shapeMap); // Helper
+
+                item.onclick = () => this.addBlock(key);
+                this.paletteEl.appendChild(item);
+            }
+        }
+
+        renderShapePreview(container, shapeMap) {
+            // Mini preview
+            const preview = document.createElement('div');
+            preview.style.display = 'grid';
+            preview.style.gap = '1px';
+            preview.style.gridTemplateColumns = `repeat(${shapeMap[0].length}, 1fr)`;
+
+            shapeMap.forEach(row => {
+                row.forEach(cell => {
+                    const div = document.createElement('div');
+                    if (cell === 1) {
+                        div.className = 'block-cell';
+                        div.style.backgroundColor = 'white';
+                    }
+                    preview.appendChild(div);
+                });
+            });
+            container.appendChild(preview);
+        }
+
+        addBlock(key) {
+            this.selectedBlocks.push(key);
+            this.renderSelectedBlocks();
+            this.updateCounts();
+        }
+
+        renderSelectedBlocks() {
+            this.selectedListEl.innerHTML = '';
+            this.selectedBlocks.forEach((key, index) => {
+                const item = document.createElement('div');
+                item.className = 'palette-item selected-item';
+                item.title = key;
+
+                // Re-use shape rendering
+                if (this.shapes[key]) {
+                    const previewContainer = document.createElement('div');
+                    previewContainer.style.pointerEvents = 'none'; // Click goes to item
+                    this.renderShapePreview(previewContainer, this.shapes[key]);
+                    item.appendChild(previewContainer);
+                } else {
+                    item.textContent = "?";
+                }
+
+                item.onclick = () => {
+                    this.selectedBlocks.splice(index, 1);
+                    this.renderSelectedBlocks();
+                    this.updateCounts();
+                };
+                this.selectedListEl.appendChild(item);
+            });
+        }
+
+        updateCounts() {
+            // Calculate Grid Targets
+            const targetCount = this.grid.flat().filter(c => c === 1).length;
+
+            // Calculate Block Cells
+            let blockCount = 0;
+            this.selectedBlocks.forEach(key => {
+                if (this.shapes[key]) {
+                    blockCount += this.shapes[key].flat().filter(c => c === 1).length;
+                }
+            });
+
+            // Update UI
+            if (this.targetCountEl) this.targetCountEl.textContent = `みどり: ${targetCount}`;
+            if (this.blockCountEl) this.blockCountEl.textContent = `ぶろっく: ${blockCount}`;
+
+            // Status Status
+            if (this.countStatusEl) {
+                if (targetCount === blockCount) {
+                    this.countStatusEl.textContent = "OK!";
+                    this.countStatusEl.style.color = "#4ecca3"; // Green
+                    this.targetCountEl.style.color = "#ffffff";
+                    this.blockCountEl.style.color = "#ffffff";
+                } else {
+                    this.countStatusEl.textContent = "ちがいます！";
+                    this.countStatusEl.style.color = "#e94560"; // Red
+                    this.targetCountEl.style.color = "#e94560";
+                    this.blockCountEl.style.color = "#e94560";
+                }
+            }
+        }
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+        window.editor = new LevelEditor();
+    });
+</script>

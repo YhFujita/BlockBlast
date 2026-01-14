@@ -1,0 +1,8 @@
+# Ignore client-side files
+game.js
+editor.js
+stages.js
+style.css
+server.py
+*.md
+.claspignore
